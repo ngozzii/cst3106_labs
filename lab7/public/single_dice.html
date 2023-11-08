@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .dice-container {
+            display: flex;
+            justify-content: center;
+        }
+
+        .dice {
+            width: 100px;
+            height: 100px;
+            margin: 5px;
+            animation: none;
+            cursor: pointer; /* Add a pointer cursor to indicate interactivity */
+        }
+
+        button {
+            margin: 20px;
+            padding: 10px 20px;
+            background-color: #04365B;
+            color: #FFFFFF;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #1C8BDD;
+        }
+
+        @keyframes roll {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(1440deg); /* Rotate 4 times (360 degrees * 4) */
+            }
+        }
+    </style>  
+</head>
+
+<body>
+    <h1 class="title">Yatzy</h1>
+    
+    <!-- dice -->
+    <div class = "dice-container">
+        <img class="dice" id="d1" src=dice1.png alt="Dice 1">
+        <img class="dice" id="d2" src=dice1.png alt="Dice 2">
+        <img class="dice" id="d3" src=dice1.png alt="Dice 3">
+        <img class="dice" id="d4" src=dice1.png alt="Dice 4">
+        <img class="dice" id="d5" src=dice1.png alt="Dice 5">
+    </div>
+
+    <div class = "button-container">
+        <button id="roll-button">Roll</button>
+    </div>
+
+    <script>
+        
+        class Dice {
+
+            constructor (element){
+                this.value = 1; //set the number of dice in the game to what is given
+                this.isSelected = false;
+                this.element = element;
+                this.diceImages = [
+                    'dice1.png',
+                    'dice2.png',
+                    'dice3.png',
+                    'dice4.png',
+                    'dice5.png',
+                    'dice6.png'
+                ]
+            }
+
+            roll() {
+                if (!this.isSelected) {
+                    this.element.style.animation = "roll 1s linear"; // Start the animation
+                    fetch('/roll-dice')
+                        .then((response) => response.json())
+                        .then((data) => {
+                            setTimeout(() => {
+                                this.element.style.animation = "none"; // Reset the animation after 1 second
+                                this.value = data.diceValue; // Get the number
+                                // Update the dice image
+                                this.element.src = this.diceImages[this.value - 1];
+                            }, 1000); // 1000 milliseconds (1 second)
+                        })
+                        .catch((error) => {
+                            console.error('Error fetching dice value:', error);
+                        });
+                }
+            }
+
+
+            click (){
+                if (this.isSelected) {this.isSelected = false;}
+                else {this.isSelected= true;}
+            }
+
+        }
+
+        const diceElements = document.querySelectorAll(".dice");
+        const rollButton = document.getElementById("roll-button");
+
+        const allDice = [];
+        diceElements.forEach((element) => {
+            const dice = new Dice(element);
+            allDice.push(dice);
+        });
+
+        // Function to start or stop spinning
+        function rollDice() {
+            allDice.forEach((element) => {
+                element.roll();
+            });
+        }
+
+        // Add a click event listener to the button
+        rollButton.addEventListener("click", rollDice);
+     
+    </script>
+    <script src="single_dice_server.js"></script>
+   
+</body>
+</html>
+
